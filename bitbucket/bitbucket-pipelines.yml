@@ -1,0 +1,18 @@
+image: amazoncorretto:11
+
+pipelines:
+  branches:
+    master:
+      - step:
+          name: Generate HTML Reports
+          script:
+            - yum install -y tar Xvfb gtk3
+            - curl -o Archi-Linux64.tgz https://www.archimatetool.com/downloads/${ARCHI_VERSION}/Archi-Linux64-${ARCHI_VERSION}.tgz
+            - tar -xvzf Archi-Linux64.tgz
+            - Xvfb :99 &
+            - export DISPLAY=:99
+            - Archi/Archi -application com.archimatetool.commandline.app -consoleLog -nosplash --loadModel ${MODEL}.archimate --html.createReport output/${MODEL}
+	    # At this point, copy the static files to S3, or a webserver, etc.
+            # eg. aws s3 cp output/${MODEL} s3://${BUCKET}/${MODEL} --recursive
+          artifacts:
+            - output/${MODEL}
